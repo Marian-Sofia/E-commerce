@@ -30,8 +30,7 @@ export class CreateProductDto {
   stock: Number;
 
   @IsNotEmpty()
-  @IsString()
-  technical_Data: String[];
+  technical_data: String[];
 
   @IsOptional()
   @IsNumber()

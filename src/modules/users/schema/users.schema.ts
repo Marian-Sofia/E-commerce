@@ -30,7 +30,7 @@ export class Users {
   address: String;
 
   @Prop({ required: true })
-  date_of_birth: Date;
+  date_of_birth: String;
 }
 
 export const UsersSchema = SchemaFactory.createForClass(Users);
