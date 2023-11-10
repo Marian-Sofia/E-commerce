@@ -4,6 +4,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Products } from './schema/products.schema';
 import { Model } from 'mongoose';
+import { ErrorManager } from 'src/utils/error.manager';
 
 @Injectable()
 export class ProductsService {
@@ -11,23 +12,50 @@ export class ProductsService {
     @InjectModel(Products.name) private productsModel: Model<Products>,
   ) {}
 
-  create(createProductDto: CreateProductDto): Promise<Products> {
-    return this.productsModel.create(createProductDto);
+  async create(createProductDto: CreateProductDto) {
+    return {
+      message: 'The product was created successfully',
+      data: await this.productsModel.create(createProductDto),
+    };
   }
 
   async findAll() {
-    return await this.productsModel.find();
+    return {
+      message: 'These are all registered products',
+      data: await this.productsModel.find(),
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(id: string) {
+    try {
+      const data = await this.productsModel.findById(id)
+      if(data === null){
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'The product was not found'
+        })
+      }
+      return {
+        message: `The product with id:${id} was found`,
+        data,
+      };  
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message)
+    }
+    
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(id: string, updateProductDto: UpdateProductDto) {
+    return {
+      message: `This product with id:${id} has been updated`,
+      data: await this.productsModel.findByIdAndUpdate(id, updateProductDto, {new: true}),
+    };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove(id: string) {
+    return {
+      message: `The product with id:${id} has been deleted`,
+      data: await this.productsModel.findByIdAndRemove(id),
+    };
   }
 }
